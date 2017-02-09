@@ -1,0 +1,13 @@
+﻿Build started 2/9/2017 3:19:45 PM.
+     1>Project "C:\Users\sydia\Desktop\Lab4\CPU_MatMul\CPU_MatMul.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /IC:\Users\sydia\Desktop\Lab4\libwb\include /Zi /nologo /W3 /WX- /sdl /Od /D LAB_DEBUG /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /errorReport:prompt main.cpp
+         main.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\sydia\Desktop\Lab4\Debug\CPU_MatMul.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\Users\sydia\Desktop\Lab4\\libwb\lib\Debug wb.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\sydia\Desktop\Lab4\Debug\CPU_MatMul.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\sydia\Desktop\Lab4\Debug\CPU_MatMul.lib" /MACHINE:X64 Debug\main.obj
+         CPU_MatMul.vcxproj -> C:\Users\sydia\Desktop\Lab4\Debug\CPU_MatMul.exe
+     1>Done Building Project "C:\Users\sydia\Desktop\Lab4\CPU_MatMul\CPU_MatMul.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.95
