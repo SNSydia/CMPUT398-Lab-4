@@ -25,11 +25,11 @@ int main(int argc, char **argv) {
 	hostB = (float *)wbImport(wbArg_getInputFile(args, 1), &numBRows,
 		&numBColumns);
 	// TODO: Allocate the hostC matrix
-	hostC = (float *) malloc(numARows * numBColumns * sizeof(float));
-	
+	hostC = (float *)malloc(numARows * numBColumns * sizeof(float));
+
 
 	wbTime_stop(Generic, "Importing data and creating memory on host");
-	
+
 	// TODO: Set numCRows and numCColumns
 	numCRows = numARows;
 	numCColumns = numBColumns;
@@ -39,7 +39,19 @@ int main(int argc, char **argv) {
 	wbLog(TRACE, "The dimensions of C are ", numCRows, " x ", numCColumns);
 
 	// TODO: Write matrix multiplication
-
+	
+	for (int i = 0; i < numARows; i++)
+	{
+		for (int j = 0; j < numBColumns; j++)
+		{
+			float sum = 0.0;
+			for (int k = 0; k < numBRows; k++)
+			{
+				sum += hostA[i * numAColumns + k] * hostB[k * numBColumns + j];
+			}
+			hostC[i * numCColumns + j] = sum;
+		}
+	}
 	
 
 	wbSolution(args, hostC, numARows, numBColumns);

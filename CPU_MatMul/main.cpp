@@ -44,12 +44,12 @@ int main(int argc, char **argv) {
 	{
 		for (int j = 0; j < numBColumns; j++)
 		{
-			hostC[i * numCColumns + j] = 69;
+			float sum = 0.0;
 			for (int k = 0; k < numBRows; k++)
 			{
-				
-
+				sum += hostA[i * numAColumns + k] * hostB[k * numBColumns + j];
 			}
+			hostC[i * numCColumns + j] = sum;
 		}
 	}
 	
