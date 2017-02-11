@@ -99,8 +99,8 @@ int main(int argc, char **argv) {
 	// dim3 blockDim( ... )
 	// dim3 gridDim( ... )
 
-	dim3 blockDim(16, 32);
-	dim3 gridDim(32, 32);
+	dim3 blockDim(16, 16);
+	dim3 gridDim(16, 16);
 
 
 	// wbLog(TRACE, "The block dimensions are ", blockDim.x, " x ", blockDim.y);

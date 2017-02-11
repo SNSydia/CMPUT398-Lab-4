@@ -7,10 +7,10 @@
 
 // Compute C = A * B
 __global__ void matrixMultiplyShared(
-	float *A, float *B, float *C, 
-	int numARows, int numAColumns, 
-	int numBRows, int numBColumns, 
-	int numCRows, int numCColumns) 
+	float *A, float *B, float *C,
+	int numARows, int numAColumns,
+	int numBRows, int numBColumns,
+	int numCRows, int numCColumns)
 {
 	// TODO: Insert code to implement matrix multiplication 
 	// here you have to use shared memory for this lab.
@@ -24,7 +24,37 @@ __global__ void matrixMultiplyShared(
 	//
 	// HINT: Take a look at the slides
 	// HINT: Look at TILE_WIDTH defined above
+
+	__shared__ float ds_M[TILE_WIDTH][TILE_WIDTH];
+	__shared__ float ds_N[TILE_WIDTH][TILE_WIDTH];
+
+	int bx = blockIdx.x;	int by = blockIdx.y;
+	int tx = threadIdx.x;	int ty = threadIdx.y;
+
+	int row = by * TILE_WIDTH + ty;
+	int col = bx * TILE_WIDTH + tx;
+	float Cvalue = 0.0;
 	
+	for (int p = 0; p < numAColumns - 1 / TILE_WIDTH + 1; p++)
+	{
+		if (row < numARows &&  p * TILE_WIDTH + tx < numAColumns)
+			ds_M[ty][tx] = A[row * numAColumns + p * TILE_WIDTH + tx];
+		else ds_M[ty][tx] = 0.0;
+		if (col < numBColumns && p * TILE_WIDTH + ty < numBRows)
+			ds_N[ty][tx] = B[(p * TILE_WIDTH + ty)*numBColumns + col];
+		else ds_N[ty][tx] = 0.0;
+
+		__syncthreads();
+
+		for (int i = 0; i < TILE_WIDTH; i++)
+		{
+			Cvalue += ds_M[ty][i] * ds_N[i][tx];
+		}
+
+		__syncthreads();
+		if (row < numCRows && col < numCColumns)
+			C[row * numCColumns + col] = Cvalue;
+	}
 }
 
 #define wbCheck(stmt)                                                     \
@@ -33,8 +63,8 @@ __global__ void matrixMultiplyShared(
     if (err != cudaSuccess) {                                             \
       wbLog(ERROR, "Failed to run stmt ", #stmt);                         \
       return -1;                                                          \
-	    }                                                                     \
-    } while (0)
+		    }                                                                     \
+      } while (0)
 
 int main(int argc, char **argv) {
 	wbArg_t args;
@@ -103,8 +133,8 @@ int main(int argc, char **argv) {
 	// dim3 blockDim( ... );
 	// dim3 gridDim( ... );
 
-	dim3 blockDim(16, 32);
-	dim3 gridDim(32, 32);
+	dim3 gridDim((numBColumns - 1)  / TILE_WIDTH + 1, (numARows - 1) / TILE_WIDTH + 1);
+	dim3 blockDim(TILE_WIDTH, TILE_WIDTH);
 
 
 
@@ -114,16 +144,22 @@ int main(int argc, char **argv) {
 	wbTime_start(Compute, "Performing CUDA computation");
 	// TODO:: Launch the GPU Kernel here
 
+	matrixMultiplyShared << <gridDim, blockDim >> >(deviceA, deviceB, deviceC, numARows, numAColumns, numBRows, numBColumns, numCRows, numCColumns);
+
 	cudaDeviceSynchronize();
 	wbTime_stop(Compute, "Performing CUDA computation");
 
 	wbTime_start(Copy, "Copying output memory to the CPU");
 	// TODO:: Copy the GPU memory back to the CPU here
+	cudaMemcpy((void *)hostC, (const void *)deviceC, numCRows * numCColumns * sizeof(float), cudaMemcpyDeviceToHost);
 
 	wbTime_stop(Copy, "Copying output memory to the CPU");
 
 	wbTime_start(GPU, "Freeing GPU Memory");
-	// TODO:: Free the GPU memory here
+	// TODO:: Free the GPU memory
+	cudaFree((void *)deviceA);
+	cudaFree((void *)deviceB);
+	cudaFree((void *)deviceC);
 	
 	wbTime_stop(GPU, "Freeing GPU Memory");
 
