@@ -13,49 +13,37 @@ __global__ void matrixMultiplyShared(
 	int numCRows, int numCColumns)
 {
 	// TODO: Insert code to implement matrix multiplication 
-	// here you have to use shared memory for this lab.
-	// Take a the tiled matrix multiplication. Also we 
-	// will be testing the speed up between a basic
-	// matrix multiplication and this kernel. To pass 
-	// the tests for the tiled matrix multiplication
-	// you will need to have the correct output and
-	// have a significant speed up over a basic matrix
-	// multiplication.
-	//
-	// HINT: Take a look at the slides
-	// HINT: Look at TILE_WIDTH defined above
+	
 
 	__shared__ float ds_M[TILE_WIDTH][TILE_WIDTH];
 	__shared__ float ds_N[TILE_WIDTH][TILE_WIDTH];
-
-	int bx = blockIdx.x;	int by = blockIdx.y;
-	int tx = threadIdx.x;	int ty = threadIdx.y;
-
-	int row = by * TILE_WIDTH + ty;
-	int col = bx * TILE_WIDTH + tx;
-	float Cvalue = 0.0;
 	
-	for (int p = 0; p < numAColumns - 1 / TILE_WIDTH + 1; p++)
-	{
-		if (row < numARows &&  p * TILE_WIDTH + tx < numAColumns)
+	int bx = blockIdx.x, by = blockIdx.y,
+		tx = threadIdx.x, ty = threadIdx.y,
+		row = by * TILE_WIDTH + ty,
+		col = bx * TILE_WIDTH + tx;
+	float Cvalue = 0;
+
+	for (int p = 0; p < (numAColumns - 1) / TILE_WIDTH + 1; p++) {
+		if (row < numARows && p * TILE_WIDTH + tx < numAColumns)
 			ds_M[ty][tx] = A[row * numAColumns + p * TILE_WIDTH + tx];
-		else ds_M[ty][tx] = 0.0;
+		else
+			ds_M[ty][tx] = 0;
 		if (col < numBColumns && p * TILE_WIDTH + ty < numBRows)
-			ds_N[ty][tx] = B[(p * TILE_WIDTH + ty)*numBColumns + col];
-		else ds_N[ty][tx] = 0.0;
+			ds_N[ty][tx] = B[(p * TILE_WIDTH + ty) * numBColumns + col];
+		else
+			ds_N[ty][tx] = 0;
 
 		__syncthreads();
-
-		for (int i = 0; i < TILE_WIDTH; i++)
-		{
-			Cvalue += ds_M[ty][i] * ds_N[i][tx];
-		}
-
+		for (int k = 0; k < TILE_WIDTH; ++k)
+			Cvalue += ds_M[ty][k] * ds_N[k][tx];
 		__syncthreads();
-		if (row < numCRows && col < numCColumns)
-			C[row * numCColumns + col] = Cvalue;
 	}
+	if (row < numCRows && col < numCColumns)
+		C[row *numCColumns + col] = Cvalue;
 }
+
+
 
 #define wbCheck(stmt)                                                     \
   do {                                                                    \
@@ -133,9 +121,13 @@ int main(int argc, char **argv) {
 	// dim3 blockDim( ... );
 	// dim3 gridDim( ... );
 
-	dim3 gridDim((numBColumns - 1)  / TILE_WIDTH + 1, (numARows - 1) / TILE_WIDTH + 1);
-	dim3 blockDim(TILE_WIDTH, TILE_WIDTH);
-
+	dim3 gridDim(16, 16);
+	// This grid size was causing inefficiencies. 
+	// Fixed by just using block size.
+	// Naega jeil jal naga!
+	//dim3 gridDim((numBColumns - 1)  / TILE_WIDTH + 1, (numARows - 1) / TILE_WIDTH + 1);
+	dim3 blockDim(16, 16);
+	
 
 
 	// wbLog(TRACE, "The block dimensions are ", blockDim.x, " x ", blockDim.y);

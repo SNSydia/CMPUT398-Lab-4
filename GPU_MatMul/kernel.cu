@@ -22,9 +22,10 @@ __global__ void matrixMultiply(float *A, float *B, float *C, int numARows,
 		for (int k = 0; k < numBRows; k++)
 		{
 			sum += A[row * numAColumns + k] * B[k * numBColumns + col];
+			C[row * numCColumns + col] = sum;
 		}
 		
-		C[row * numCColumns + col] = sum;
+		//C[row * numCColumns + col] = sum;
 	}
 
 }
@@ -99,8 +100,8 @@ int main(int argc, char **argv) {
 	// dim3 blockDim( ... )
 	// dim3 gridDim( ... )
 
-	dim3 blockDim(16, 16);
-	dim3 gridDim(16, 16);
+	dim3 blockDim(32, 32);
+	dim3 gridDim(32, 32);
 
 
 	// wbLog(TRACE, "The block dimensions are ", blockDim.x, " x ", blockDim.y);
